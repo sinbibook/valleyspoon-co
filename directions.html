@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="data:,">
+    <title>가평 계곡한스푼 풀빌라펜션 - 오시는길</title>
+
+    <link rel="stylesheet" href="styles/swiper-bundle.min.css" />
+    <link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
+    <link rel="stylesheet" href="styles/theme.css">
+    <link rel="stylesheet" type="text/css" href="styles/common.css">
+    <link rel="stylesheet" type="text/css" href="styles/style.css">
+
+    <script src="https://code.jquery.com/jquery-latest.min.js"></script>
+    <script src="js/swiper-bundle.min.js"></script>
+    <script src="https://unpkg.com/aos@next/dist/aos.js"></script>
+    <script type="text/javascript" src="js/kakao-maps-sdk.js"></script>
+    <script type="text/javascript">
+        function setCookie(name, value, expirehours) {
+            var todayDate = new Date();
+            todayDate.setHours(todayDate.getHours() + expirehours);
+            document.cookie = name + "=" + escape(value) + "; path=/; expires=" + todayDate.toGMTString() + ";";
+        }
+
+        function closeWin(id, checkbox) {
+            if (checkbox.checked) {
+                setCookie(id, "done", 1);
+            }
+            document.getElementById(id).style.display = "none";
+        }
+    </script>
+  <!-- Open Graph Meta Tags for Social Media -->
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="가평 계곡한스푼 풀빌라펜션 - 오시는길" />
+  <meta property="og:description" content="가평 계곡 한스푼에서 물소리와 자연이 어우러진 공간 속에서 편안한 휴식과 여유로운 시간을 온전히 느껴보세요, 일상 속 쉼을 경험해보세요" />
+  <meta property="og:image" content="https://bookingplay-media.s3.amazonaws.com/item_images/2026/04/20/k8mnYVKd6zrH.jpg" />
+  <meta property="og:url" content="https://valleyspoon.co.kr" />
+
+  <!-- Twitter Card Meta Tags -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="가평 계곡한스푼 풀빌라펜션 - 오시는길" />
+  <meta name="twitter:description" content="가평 계곡 한스푼에서 물소리와 자연이 어우러진 공간 속에서 편안한 휴식과 여유로운 시간을 온전히 느껴보세요, 일상 속 쉼을 경험해보세요" />
+  <meta name="twitter:image" content="https://bookingplay-media.s3.amazonaws.com/item_images/2026/04/20/k8mnYVKd6zrH.jpg" />
+  <meta name="naver-site-verification" content="f77bfca07657210d6944e559bc366e9080799b4d" />
+  <meta name="google-site-verification" content="2ELQ4nRTAw7CJXNajrgvPJwOR1_6lkVNO3eTb-TQ85E" />
+</head>
+<body>
+    <script src="js/header-footer-loader.js"></script>
+    <div id="sh_wrapper">
+    <main id="sh_container">
+
+            <!-- main_banner [s] -->
+            <!-- MAPPER: customFields.pages.directions.sections[0].hero.images[isSelected] 동적 배경이미지 적용 -->
+            <article>
+                <div id="main_banner">
+                    <div class="swiper-container main_slide">
+                        <div class="swiper-wrapper" data-directions-hero-slides>
+                        </div>
+                    </div>
+                </div>
+            </article>
+            <!-- main_banner [e] -->
+
+            <!-- s: snb_wrap -->
+            <div id="snb_wrap">
+                <ul>
+                    <li><a href="./about.html">외부풍경</a></li>
+                    <li class="on"><a href="./directions.html">오시는길</a></li>
+                </ul>
+            </div>
+
+            <div id="traffic">
+                <div class="tit">
+                    <span class="deco"></span>
+                    <h1><span data-directions-hero-title>TRIP TEMPLATE</span> DIRECTION</h1>
+                </div>
+                <div class="cont">
+                    <div class="room_if inner" data-aos="fade-up" style="padding-top:0;">
+                        <div class="info">
+                            <div class="l_cont">
+                                <div class="map_wrap">
+                                    <div id="kakao-map" style="width:100%; height:400px; background:#e8e8e8;"></div>
+                                </div>
+                            </div>
+                            <div class="r_cont traffic">
+                                <div class="address">
+                                    <div class="tx1">네비게이션 이용 시</div>
+                                    <div class="tx2">
+                                        도로명 주소 ｜
+                                        <span class="underline" data-directions-address>여기에 주소를 입력하세요</span>
+                                    </div>
+                                </div>
+                                <div class="notice">
+                                    <div class="tx1" data-directions-notice-title>이용안내</div>
+                                    <div class="tx2" data-directions-notice-description>
+                                       
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+    </main>
+    </div>
+
+    <script src="js/preview-handler.js"></script>
+    <script src="js/image-helpers.js"></script>
+    <script src="js/data-mapper/core/base-mapper.js"></script>
+    <script src="js/data-mapper/pages/directions-mapper.js"></script>
+    <script src="js/data-mapper/pages/header-footer-mapper.js"></script>
+    <script src="js/common.js"></script>
+    <script src="js/pages/directions.js"></script>
+</body>
+</html>

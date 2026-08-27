@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="data:,">
+    <title>가평 계곡한스푼 풀빌라펜션 - 예약안내</title>
+
+    <link rel="stylesheet" href="styles/swiper-bundle.min.css" />
+    <link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
+    <link rel="stylesheet" href="styles/theme.css">
+    <link rel="stylesheet" type="text/css" href="styles/common.css">
+    <link rel="stylesheet" type="text/css" href="styles/style.css">
+    <link rel="stylesheet" type="text/css" href="styles/popup_black.css">
+
+    <script src="https://code.jquery.com/jquery-latest.min.js"></script>
+    <script src="js/swiper-bundle.min.js"></script>
+    <script src="https://unpkg.com/aos@next/dist/aos.js"></script>
+    <script type="text/javascript">
+        function setCookie(name, value, expirehours) {
+            var todayDate = new Date();
+            todayDate.setHours(todayDate.getHours() + expirehours);
+            document.cookie = name + "=" + escape(value) + "; path=/; expires=" + todayDate.toGMTString() + ";";
+        }
+
+        function closeWin(id, checkbox) {
+            if (checkbox.checked) {
+                setCookie(id, "done", 1);
+            }
+            document.getElementById(id).style.display = "none";
+        }
+    </script>
+  <!-- Open Graph Meta Tags for Social Media -->
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="가평 계곡한스푼 풀빌라펜션 - 예약안내" />
+  <meta property="og:description" content="가평 계곡 한스푼에서 물소리와 자연이 어우러진 공간 속에서 편안한 휴식과 여유로운 시간을 온전히 느껴보세요, 일상 속 쉼을 경험해보세요" />
+  <meta property="og:image" content="https://bookingplay-media.s3.amazonaws.com/item_images/2026/04/20/k8mnYVKd6zrH.jpg" />
+  <meta property="og:url" content="https://valleyspoon.co.kr" />
+
+  <!-- Twitter Card Meta Tags -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="가평 계곡한스푼 풀빌라펜션 - 예약안내" />
+  <meta name="twitter:description" content="가평 계곡 한스푼에서 물소리와 자연이 어우러진 공간 속에서 편안한 휴식과 여유로운 시간을 온전히 느껴보세요, 일상 속 쉼을 경험해보세요" />
+  <meta name="twitter:image" content="https://bookingplay-media.s3.amazonaws.com/item_images/2026/04/20/k8mnYVKd6zrH.jpg" />
+  <meta name="naver-site-verification" content="f77bfca07657210d6944e559bc366e9080799b4d" />
+  <meta name="google-site-verification" content="2ELQ4nRTAw7CJXNajrgvPJwOR1_6lkVNO3eTb-TQ85E" />
+</head>
+<body>
+    <script src="js/header-footer-loader.js"></script>
+    <div id="sh_wrapper">
+    <main id="sh_container">
+    
+            <!-- main_banner [s] -->
+            <article>
+                <div id="main_banner">
+                    <div class="swiper-container main_slide">
+                        <!-- MAPPER: customFields.pages.reservation.sections[0].hero.images[isSelected] → 슬라이드 동적 생성 -->
+                        <div class="swiper-wrapper"></div>
+                    </div>
+                </div>
+            </article>
+            <!-- main_banner [e] -->
+
+            <!-- reservation content [s] -->
+            <div id="room_cont">
+                <div id="reserve">
+                    <div class="tit">
+                        <span class="deco"></span>
+                        <!-- MAPPER: reservation.hero.title (1순위) / 값 없으면 아래 기본값 유지 -->
+                        <h1 data-reservation-title><span>RESERVATION</span> INFORMATION</h1>
+                    </div>
+                    <!-- MAPPER: property.realtimeBookingId → 예약 링크 (제목 아래 중앙 버튼) -->
+                    <div class="golink">
+                        <a href="#!">예약하기</a>
+                    </div>
+                    <div class="cont">
+                        <div class="room_if inner" data-aos="fade-up" style="padding-top:0;">
+                            <div class="info">
+                                <div class="r_cont reserve">
+                                    <div class="check">
+                                        <div>
+                                            <h3>예약안내</h3>
+                                            <!-- MAPPER: property.reservationGuide (\n→<br>) -->
+                                            <ul class="dot">
+                                                <li data-reservation-guide></li>
+                                            </ul>
+                                        </div>
+                                        <div>
+                                            <h3>환불안내</h3>
+                                            <!-- MAPPER: property.refundPolicies[] → 동적 생성 -->
+                                            <ul class="dot">
+                                                <li data-reservation-refund></li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- reservation content [e] -->
+
+    </main>
+    </div>
+
+    <script src="js/preview-handler.js"></script>
+    <script src="js/image-helpers.js"></script>
+    <script src="js/data-mapper/core/base-mapper.js"></script>
+    <script src="js/data-mapper/pages/reservation-mapper.js"></script>
+    <script src="js/data-mapper/pages/header-footer-mapper.js"></script>
+    <script src="js/common.js"></script>
+    <script src="js/pages/reservation.js"></script>
+</body>
+</html>
