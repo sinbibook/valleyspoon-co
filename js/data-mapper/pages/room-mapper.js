@@ -36,9 +36,12 @@
   RoomMapper.prototype.mapPage = function () {
     this.mapRoomDetail();
     this.mapAmenities();
+    this.mapFloorplan();
     this.mapRoomPreview();
     this.mapRoomNavigation();
-    this.mapPropertyNames();
+    // mapPropertyNames() 는 호출하지 않는다 — RoomMapper 에도 BaseDataMapper 에도
+    // 정의가 없어 여기서 예외가 나고, 그 뒤 updateMetaTags() 가 실행되지 않았다.
+    // room.html 에는 [data-property-*] 슬롯이 하나도 없어 채울 대상도 없다.
     this.updateMetaTags();
   };
 
@@ -93,7 +96,7 @@
     var room = this.getMatchedRoom(rt);
     if (!rt) return;
 
-    var name = (rt && rt.name) || '';
+    var name = this.getRoomtypeName(rt);
 
     // 객실명 매핑 (h1)
     var titleEl = document.querySelector('#room_cont .tit h1');
@@ -186,13 +189,14 @@
       });
     }
 
-    // .room_if .txt: customFields hero title 우선 → 입력 안 했으면 room.description fallback (\n→<br>)
+    // .room_if .txt: customFields hero title 만 노출 (\n→<br>). room.description 은 폴백으로 쓰지 않는다.
     // 빈 값도 항상 반영 → 프리뷰에서 실시간으로 지워지고 바뀜
     var descEl = document.querySelector('.room_if .txt');
     if (descEl) {
       var heroTitle = this.getRoomHeroTitle(rt);
-      var txt = (heroTitle && heroTitle.trim()) ? heroTitle : ((room && room.description) || '');
+      var txt = (heroTitle && heroTitle.trim()) ? heroTitle : '';
       descEl.innerHTML = txt.replace(/\n/g, '<br>');
+      descEl.style.display = txt ? '' : 'none';
     }
 
     // golink 버튼 매핑 (property.realtimeBookingId 사용)
@@ -218,7 +222,7 @@
     if (!wrapper) return;
 
     var rt = this.getCurrentRoomType();
-    var name = (rt && rt.name) || '';
+    var name = this.getRoomtypeName(rt);
 
     var images = this.getCategoryImages(rt, 'roomtype_interior').filter(function (img) {
       return img && img.url;
@@ -275,7 +279,6 @@
 
     ul.innerHTML = '';
 
-    // layoutMap(미리보기)이 enabled면 "미리보기" 항목 추가 (room 페이지이므로 on 아님)
     var pages = this.getPages();
     var layoutEnabled = pages.layoutMap && pages.layoutMap.sections &&
       pages.layoutMap.sections[0] && pages.layoutMap.sections[0].enabled !== false;
@@ -288,28 +291,66 @@
       ul.appendChild(pli);
     }
 
+    var self = this;
     var currentId = currentRt && currentRt.id;
-    roomtypes.forEach(function (rt) {
-      if (!rt.name || !rt.name.trim()) return;
+    var activeRoomtypes = roomtypes.filter(function (rt) {
+      if (!self.getRoomtypeName(rt)) return false;
+      var matched = self.getMatchedRoom(rt);
+      return !(matched && matched.status === 'inactive');
+    });
+    var roomItems = this.getRoomMenuItems(activeRoomtypes);
+    // 그룹 안이면 그 그룹의 객실만 펼친다.
+    // 헤더/미리보기 메뉴는 그룹명 하나로 접히고 클릭 시 그룹의 첫 객실로 들어가는데,
+    // 이 탭까지 접혀 있으면 2번째 객실부터는 UI 로 도달할 방법이 없다.
+    // 멤버가 1실인 그룹은 펼치지 않는다(항목이 하나뿐이라 의미가 없다).
+    var activeGroup = null;
+    roomItems.forEach(function (it) {
+      var members = (it && it.roomtypes) || [];
+      if (members.length > 1 && self.isRoomMenuItemActive(it, currentId)) activeGroup = it;
+    });
+    if (activeGroup) {
+      roomItems = activeGroup.roomtypes.map(function (rt) {
+        return { label: self.getRoomtypeName(rt), roomtype: rt, roomtypes: [rt] };
+      });
+    }
+    roomItems.forEach(function (item) {
+      var roomLabel = self.getRoomMenuLabel(item);
       var li = document.createElement('li');
       var link = document.createElement('a');
-      link.href = 'room.html?id=' + rt.id;
-      link.textContent = rt.name;
-
-      if (rt.id === currentId) {
-        li.className = 'on';
-      }
-
+      link.href = self.getRoomMenuLink(item, 'id');
+      link.textContent = roomLabel;
+      if (self.isRoomMenuItemActive(item, currentId)) li.className = 'on';
       li.appendChild(link);
       ul.appendChild(li);
     });
   };
 
-  // MAPPER: property.name → 숙소명 표기 요소들
-  RoomMapper.prototype.mapPropertyNames = function () {
-    var name = this.getPropertyName();
-    document.querySelectorAll('[data-property-name]').forEach(function (el) {
-      el.textContent = name;
+  /* MAPPER: roomtypes[current] 평면도 이미지 → [data-room-floorplan-image]
+     ⚠️ 제목·설명 자리가 없다. 도면 이미지 한 장이 전부다.
+     ⚠️ 이미지가 없으면 [data-room-floorplan-section] 을 통째로 숨긴다 —
+        원본에 없던 빈 구간을 남기지 않는다.
+        (layout-map 의 배치도는 반대로 없어도 placeholder 를 세운다 — 규칙이 정반대다.)
+     ⚠️ URL 이 있는데 로드가 죽어도 구간째 숨긴다 — 깨진 아이콘만 남는 것보다 낫다. */
+  RoomMapper.prototype.mapFloorplan = function () {
+    var sections = document.querySelectorAll('[data-room-floorplan-section]');
+    if (!sections.length) return;
+
+    var image = this.getRoomFloorplanImage(this.getCurrentRoomType());
+    var url = (image && image.url) || '';
+
+    sections.forEach(function (el) {
+      el.style.display = url ? '' : 'none';
+    });
+    if (!url) return;
+
+    document.querySelectorAll('[data-room-floorplan-image]').forEach(function (img) {
+      img.alt = '객실 평면도';
+      img.onerror = function () {
+        sections.forEach(function (el) {
+          el.style.display = 'none';
+        });
+      };
+      img.src = url;
     });
   };
 

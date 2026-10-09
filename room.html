@@ -108,7 +108,7 @@
                             </ul>
                         </div>
                         <div class="room_if inner" data-aos="fade-up">
-                            <!-- MAPPER: rooms[current].description (\n→<br>) -->
+                            <!-- MAPPER: customFields roomtype hero title (\n→<br>), 없으면 미노출 -->
                             <div class="txt">
                             </div>
 
@@ -251,6 +251,14 @@
                         </div>
                     </div>
                 </div>
+                <!-- s: 객실 평면도 — 원본 객실 상세의 평면도 크롤링 이미지가 있을 때만 노출.
+                     제목 영역 없이 도면 이미지 한 장만 놓는다. 없으면 매퍼가 구간째 숨긴다. -->
+                <div class="room_floorplan" data-room-floorplan-section style="display: none">
+                    <!-- data-* : data-room-floorplan-image
+                         roomtypes[current] 평면도 이미지 → 없으면 섹션 미노출 -->
+                    <img alt="객실 평면도" data-room-floorplan-image />
+                </div>
+                <!--// 객실 평면도 -->
                 <!-- 서브페이지 [e] -->
             </div>
 
