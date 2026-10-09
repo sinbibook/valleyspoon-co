@@ -1,6 +1,28 @@
 (function (global) {
   'use strict';
 
+  // 상담하기 — 뒤에 property.tripPropertyId 가 붙는다
+  var CONSULT_BASE_URL = 'https://www.bookingplay.co.kr/api/cti_eicn/kakao_happy_talk?tid=';
+
+  // 파트너 타입 — 원천은 백오피스 DB `public.contract_info.partner_type` 이고
+  // BFF 가 코드 문자열을 그대로 내려준다. **분기는 템플릿이 한다**(PC/모바일은 템플릿만 안다).
+  //
+  //   distributor_a  총판A     PC 상담하기 / 모바일 상담하기 + 예약하기
+  //   distributor_b  총판B     PC 없음     / 모바일 예약하기
+  //   sales_agency   판매대행  PC 없음     / 모바일 예약하기
+  //
+  // ⚠️ 예약하기는 **파트너 타입과 무관**하다 — 세 타입 모두 모바일에서만 뜬다.
+  //    그건 기존 `.ft_btn_reserve.for_m` 의 미디어쿼리가 이미 하고 있어 손대지 않는다.
+  //    타입으로 갈리는 것은 상담하기 하나뿐이다.
+  var CONSULT_PARTNER_TYPES = ['distributor_a'];
+
+  // ⚠️ base-mapper 에 `cleanText` 가 없는 템플릿이 있어 의존하지 않는다.
+  function consultText(v) {
+    return v === undefined || v === null ? '' : String(v).trim();
+  }
+
+
+
   function HeaderFooterMapper() {
     BaseDataMapper.call(this);
   }
@@ -12,12 +34,27 @@
     this.mapFavicon();
     this.mapBookingLinks();
     this.mapYbsButton();
+    this.mapConsult();
+    this.mapSocialLinks();
     this.mapRoomMenu();
     this.mapFacilityMenu();
     this.mapFooterMenu();
     this.mapTravelMenu();
+    this.mapLayoutMapMenu();
     this.mapHeaderNavHover();
     this.mapFooter();
+  };
+
+  // MAPPER: layoutMap.enabled === false 이면 ROOMS 서브메뉴의 `미리보기` 숨김
+  // (헤더 PC + 모바일 aside). 기존에는 mapFooterMenu 가 ROOMS 대메뉴의 href 만
+  // 바꾸고 서브메뉴 항목은 그대로 둬서, 꺼진 페이지에 눌러 들어갈 수 있었다.
+  HeaderFooterMapper.prototype.mapLayoutMapMenu = function () {
+    var pages = this.getPages();
+    var lm = pages.layoutMap && pages.layoutMap.sections && pages.layoutMap.sections[0];
+    var hide = !!(lm && lm.enabled === false);
+    document.querySelectorAll('[data-layout-map-menu]').forEach(function (el) {
+      el.style.display = hide ? 'none' : '';
+    });
   };
 
   // MAPPER: nearbyAttractions.enabled === false 이면 TRAVEL/주변여행지 메뉴 숨김 (헤더 PC·모바일 + 푸터)
@@ -44,12 +81,13 @@
       } else {
         var self = this;
         var firstActive = this.getRoomtypes().filter(function (rt) {
-          return rt.name && rt.name.trim();
+          return !!self.getRoomtypeName(rt);
         }).find(function (rt) {
           var m = self.getMatchedRoom(rt);
           return m && m.status === 'active';
         });
-        roomsLink.href = firstActive ? ('room.html?id=' + firstActive.id) : 'room.html';
+        var firstItem = this.getRoomMenuItems(firstActive ? [firstActive] : [])[0];
+        roomsLink.href = firstItem ? this.getRoomMenuLink(firstItem, 'id') : 'room.html';
       }
     }
 
@@ -149,6 +187,91 @@
     });
   };
 
+  // 소셜 링크 플랫폼 — [data-homepage-socialLinks-{platform}] 와 1:1.
+  // 헤더 네이버 버튼은 blog 칸을 쓴다(어드민에서 네이버 플레이스 주소를 blog 에 입력).
+  var SOCIAL_PLATFORMS = ['facebook', 'instagram', 'blog', 'youtube'];
+
+  // MAPPER: homepage.socialLinks.{platform} → [data-homepage-socialLinks-{platform}] (href, 없으면 숨김)
+  //
+  // 값이 있으면 href + 노출, 없으면(null·빈 문자열·공백·키 없음) 숨긴다.
+  // 마크업은 매핑 전 깜빡임이 없도록 `.hidden-social-link`(숨김) 상태로 시작한다.
+  // 버튼을 감싸는 [data-social-wrap] 은 안에 보이는 버튼이 없으면 래퍼째 숨긴다.
+  // E형 헤더 마크업은 blog·instagram 두 개(PC #shGnb · 모바일 #topmenuM) — facebook / youtube 는 매칭 요소 0개.
+  // 헤더에 버튼이 하나라도 보이면 루트에 data-social="on" 을 찍는다 — PC 대메뉴 여백을 줄이는 CSS 기준
+  // (:has 대신 — 일부 브라우저에서 스타일 미반영).
+  HeaderFooterMapper.prototype.mapSocialLinks = function () {
+    var socialLinks = this.getHomepage().socialLinks || {};
+    var headerOn = false;
+    SOCIAL_PLATFORMS.forEach(function (platform) {
+      var url = consultText(socialLinks[platform]);
+      document.querySelectorAll('[data-homepage-socialLinks-' + platform + ']').forEach(function (el) {
+        if (!url) {
+          el.classList.add('hidden-social-link');
+          el.setAttribute('href', '#!');
+          el.removeAttribute('target');
+          el.removeAttribute('rel');
+          return;
+        }
+        el.setAttribute('href', url);
+        el.setAttribute('target', '_blank');
+        el.setAttribute('rel', 'noopener');
+        el.classList.remove('hidden-social-link');
+        if (el.closest('#sh_hd')) headerOn = true;
+      });
+    });
+    document.querySelectorAll('[data-social-wrap]').forEach(function (wrap) {
+      var visible = wrap.querySelector(
+        '[data-homepage-socialLinks-facebook]:not(.hidden-social-link),' +
+        '[data-homepage-socialLinks-instagram]:not(.hidden-social-link),' +
+        '[data-homepage-socialLinks-blog]:not(.hidden-social-link),' +
+        '[data-homepage-socialLinks-youtube]:not(.hidden-social-link)'
+      );
+      wrap.classList.toggle('hidden-social-link', !visible);
+    });
+    document.documentElement.setAttribute('data-social', headerOn ? 'on' : 'off');
+  };
+
+  // 상담 URL 에 쓸 tripPropertyId. 없거나 형식이 아니면 빈 문자열.
+  HeaderFooterMapper.prototype.getConsultId = function () {
+    var raw = consultText(this.getProperty().tripPropertyId);
+    // ⚠️ URL 쿼리에 그대로 붙는 값이라 토큰 형태만 통과시킨다. 플레이스홀더
+    //    문자열(`숙소 ID` 같은 한글·공백)이 들어와도 링크가 깨지지 않는다.
+    return /^[A-Za-z0-9_-]+$/.test(raw) ? raw : '';
+  };
+
+  // 상담하기 노출 대상인가 — 파트너 타입 + tripPropertyId 둘 다 있어야 한다.
+  HeaderFooterMapper.prototype.isConsultVisible = function () {
+    var partnerType = consultText(this.getProperty().partnerType);
+    return Boolean(this.getConsultId()) && CONSULT_PARTNER_TYPES.indexOf(partnerType) !== -1;
+  };
+
+  // MAPPER: property.tripPropertyId + partnerType → [data-consult-button] (우측 하단 상담하기)
+  //
+  // 총판A 만 노출하고, `tripPropertyId` 가 비면 타입과 무관하게 숨긴다.
+  // 값이 없으면 `[data-consult-wrap]` 째 숨긴다 — 버튼만 숨기면 빈 박스가 남는다.
+  HeaderFooterMapper.prototype.mapConsult = function () {
+    var tripPropertyId = this.getConsultId();
+    var visible = this.isConsultVisible();
+
+    // 상담하기가 빠지면 예약하기 아래가 비어 버린다.
+    // CSS 가 위치를 되돌릴 수 있도록 상태를 루트에 찍는다.
+    document.documentElement.setAttribute('data-consult', visible ? 'on' : 'off');
+
+    document.querySelectorAll('[data-consult-button]').forEach(function (el) {
+      var host = el.closest('[data-consult-wrap]') || el;
+      if (!visible) {
+        host.style.display = 'none';
+        return;
+      }
+      host.style.display = '';
+      var target = el.tagName === 'A' ? el : el.querySelector('a');
+      if (target) {
+        target.href = CONSULT_BASE_URL + tripPropertyId;
+        target.setAttribute('target', '_blank');
+      }
+    });
+  };
+
   // 매퍼가 추가한 항목만 제거 (중복 실행 대비 — 하드코딩 항목은 유지)
   function clearMapped(container) {
     if (!container) return;
@@ -159,27 +282,29 @@
 
   // MAPPER: roomtypes[].name → ROOMS 메뉴 동적 생성 (미리보기 다음에)
   HeaderFooterMapper.prototype.mapRoomMenu = function () {
+    var self = this;
     var roomtypes = this.getRoomtypes();
-    // PC + 모바일 ROOMS 서브메뉴 둘 다 동적 생성 ("미리보기" 다음에 객실들 append)
+    var roomItems = this.getRoomMenuItems(roomtypes);
     var containers = document.querySelectorAll('[data-rooms-submenu], [data-rooms-submenu-mobile]');
     if (!containers.length) return;
 
     containers.forEach(function (container) {
       clearMapped(container);
-      roomtypes.forEach(function (rt) {
-        if (!rt.name || !rt.name.trim()) return;
+      roomItems.forEach(function (item) {
+        var name = self.getRoomMenuLabel(item);
+        if (!String(name).trim()) return;
         var li = document.createElement('li');
         li.setAttribute('data-mapped', '');
         var a = document.createElement('a');
-        a.href = 'room.html?id=' + rt.id;
-        a.textContent = rt.name;
+        a.href = self.getRoomMenuLink(item, 'id');
+        a.textContent = name;
+        a.title = name; // 말줄임될 때 전체 객실명을 툴팁으로
         li.appendChild(a);
         container.appendChild(li);
       });
     });
   };
 
-  // MAPPER: property.facilities[].name → SPECIAL 메뉴 동적 생성
   HeaderFooterMapper.prototype.mapFacilityMenu = function () {
     var facilities = this.getProperty().facilities || [];
     var container = document.querySelector('[data-facility-submenu]');
@@ -198,6 +323,7 @@
         var a = document.createElement('a');
         a.href = 'facility.html?id=' + f.id;
         a.textContent = f.name;
+        a.title = f.name;
         li.appendChild(a);
         target.appendChild(li);
       });
@@ -245,7 +371,20 @@
   };
 
   // MAPPER: property.name, property.contactPhone, businessInfo
+  // MAPPER: property.tripProviderName → [data-copyright]
+  // 공급사명이 있으면 data-copyright 의 템플릿 문자열에서 {provider} 를 치환한다.
+  // 값이 없으면(백오피스 미입력 → "") HTML 의 기존 트립일레븐 문구를 그대로 둔다.
+  HeaderFooterMapper.prototype.mapCopyright = function () {
+    var provider = String(this.getProperty().tripProviderName || '').trim();
+    if (!provider) return;
+    document.querySelectorAll('[data-copyright]').forEach(function (el) {
+      var tpl = el.getAttribute('data-copyright') || '';
+      el.textContent = tpl.replace(/\{provider\}/g, provider);
+    });
+  };
+
   HeaderFooterMapper.prototype.mapFooter = function () {
+    this.mapCopyright();
     var prop = this.getProperty();
 
     // Footer 슬로건
@@ -256,11 +395,26 @@
       sloganEl.textContent = '지금 바로 ' + propertyName + particle + ' 함께해 보세요.';
     }
 
-    // 업체 전화번호
-    var phone = this.toPhoneList(prop.contactPhone)[0];
+    // 업체 전화번호 (배열이면 전부 한 줄씩 노출)
+    var phones = this.toPhoneList(prop.contactPhone);
     var phoneEl = document.querySelector('[data-footer-phone]');
     if (phoneEl) {
-      phoneEl.textContent = phone;
+      phoneEl.textContent = '';
+      // 고정 높이 footer가 넘치지 않도록 번호 2개 이상일 때만 상단 여백 축소
+      var footerEl = document.querySelector('#sh_ft');
+      if (footerEl) {
+        if (phones.length > 1) {
+          footerEl.classList.add('has-multi-phone');
+        } else {
+          footerEl.classList.remove('has-multi-phone');
+        }
+      }
+      phones.forEach(function (p) {
+        var item = document.createElement('span');
+        item.className = 'phoneItem';
+        item.textContent = p;
+        phoneEl.appendChild(item);
+      });
     }
 
     // 사업자 정보 (주소 / 사업자번호 / 대표자 — 줄바꿈 유지, 링크·pop은 형제이므로 건드리지 않음)
