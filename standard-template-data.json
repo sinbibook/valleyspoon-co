@@ -1,7 +1,7 @@
 {
   "metadata": {
-    "version": "1.3.0",
-    "generatedAt": "2026-10-09T12:36:56.298856773Z",
+    "version": "1.4.0",
+    "generatedAt": "2026-10-20T16:06:56.350410128Z",
     "templateType": "trip_e",
     "propertyId": "1f2b874f-67e0-4dd2-8fc4-6faef7d86a78",
     "homepageId": "7ea5ed4b-81cf-492d-8088-3da204fb6ddd"
@@ -2325,15 +2325,15 @@
                     "id": "74a6c75f-4c0d-4a40-98df-9736a455afcd",
                     "url": "https://jlnjajtcnyqupfaqjerz.supabase.co/storage/v1/object/public/app-images/homepage/7ea5ed4b-81cf-492d-8088-3da204fb6ddd/index_essence/1787639373636-kugbf0feoy.jpg",
                     "sortOrder": 2,
-                    "description": "자연의 흐름이 가장 가까이 머무는 자리",
+                    "description": "편안한 온기로 채워지는 휴식의 순간",
                     "isSelected": true,
                     "blockId": null
                   },
                   {
-                    "id": "fc0f8e98-8392-4ed1-9686-62e4cc1874fb",
-                    "url": "https://jlnjajtcnyqupfaqjerz.supabase.co/storage/v1/object/public/app-images/homepage/7ea5ed4b-81cf-492d-8088-3da204fb6ddd/index_essence/1787639373604-gws1z3z9jn.jpg",
+                    "id": "01a15a10-d135-7214-bd91-e1974c0fb887",
+                    "url": "https://jlnjajtcnyqupfaqjerz.supabase.co/storage/v1/object/public/app-images/homepage/7ea5ed4b-81cf-492d-8088-3da204fb6ddd/index_essence/1792512413485-3mq3ygp0jk.webp",
                     "sortOrder": 3,
-                    "description": "편안한 온기로 채워지는 휴식의 순간",
+                    "description": "자연 속에서 맛있는 한끼",
                     "isSelected": true,
                     "blockId": null
                   },
@@ -2860,6 +2860,9 @@
               "enabled": true
             }
           ]
+        },
+        "landing": {
+          "sections": [ ]
         }
       },
       "popup": {
@@ -4541,7 +4544,10 @@
           ],
           "nameEn": ""
         }
-      ]
+      ],
+      "footer": {
+        "ruralStayMark": null
+      }
     }
   }
 }
